@@ -5,7 +5,7 @@ Inspired by [proxy-list](https://github.com/chill117/proxy-lists#readme)
 
 Still working on it
 
-##To run it
+## To run it
 
 ```
 dep ensure #to get dependencies
