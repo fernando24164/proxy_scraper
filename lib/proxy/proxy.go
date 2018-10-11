@@ -1,8 +1,9 @@
 package proxy
 
 type Proxy struct {
-	IP   string `json:"ip"`
-	Port string `json:"port"`
+	IP       string `json:"ip"`
+	Port     string `json:"port"`
+	Protocol string `json:"protocol"`
 }
 
 func New() *Proxy {
@@ -15,4 +16,8 @@ func (p *Proxy) SetIP(ip string) {
 
 func (p *Proxy) SetPort(port string) {
 	p.Port = port
+}
+
+func (p *Proxy) SetProtocol(protocol string) {
+	p.Protocol = protocol
 }

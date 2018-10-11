@@ -30,6 +30,15 @@ func TestSetPort(t *testing.T) {
 	}
 }
 
+func TestSetProtocol(t *testing.T) {
+	proxy := New()
+	proxy.SetProtocol("http")
+	if proxy.Protocol != "http" {
+		t.Log("Incorrect set protocol method")
+		t.Fail()
+	}
+}
+
 func TestProxiesList(t *testing.T) {
 	pl := NewList()
 	if pl == nil {
