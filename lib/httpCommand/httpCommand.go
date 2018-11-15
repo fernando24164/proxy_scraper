@@ -12,8 +12,14 @@ type Command interface {
 }
 
 type HTTPRequest struct {
-	client  *http.Client
-	request *http.Request
+	client   *http.Client
+	request  *http.Request
+	isCached bool
+}
+
+func NewHTTPRequest() *HTTPRequest {
+	return &HTTPRequest{client: &http.Client{},
+		isCached: false}
 }
 
 func (hr *HTTPRequest) SetRequest(url string, arguments ...string) {
@@ -25,19 +31,23 @@ func (hr *HTTPRequest) SetRequest(url string, arguments ...string) {
 	}
 }
 
-func (hr *HTTPRequest) Execute() *html.Node {
-	resp, err := hr.client.Do(hr.request)
+func (hr *HTTPRequest) Execute(url string) *html.Node {
+	if !hr.isCached {
+		hr.SetRequest(url)
+		resp, err := hr.client.Do(hr.request)
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		dataResponse, err := html.Parse(resp.Body)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		hr.isCached = true
+		return dataResponse
 	}
-	defer resp.Body.Close()
-
-	dataResponse, err := html.Parse(resp.Body)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return dataResponse
+	return &html.Node{}
 }
