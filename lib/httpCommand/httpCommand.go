@@ -12,16 +12,18 @@ type Command interface {
 }
 
 type HTTPRequest struct {
-	client   *http.Client
-	request  *http.Request
-	isCached bool
+	client         *http.Client
+	request        *http.Request
+	cachedResponse *html.Node
+	isCached       bool
 }
 
-func NewHTTPRequest() *HTTPRequest {
-	return &HTTPRequest{client: &http.Client{},
+func NewHTTPRequest(httpClient *http.Client) *HTTPRequest {
+	return &HTTPRequest{client: httpClient,
 		isCached: false}
 }
 
+// TODO Add curry function to set more headers
 func (hr *HTTPRequest) SetRequest(url string, arguments ...string) {
 	if len(arguments) < 1 {
 		hr.request, _ = http.NewRequest("GET", url, nil)
@@ -47,7 +49,8 @@ func (hr *HTTPRequest) Execute(url string) *html.Node {
 			log.Fatal(err)
 		}
 		hr.isCached = true
+		hr.cachedResponse = dataResponse
 		return dataResponse
 	}
-	return &html.Node{}
+	return hr.cachedResponse
 }

@@ -36,3 +36,8 @@ func TestHTTPRequest_SetRequest(t *testing.T) {
 		})
 	}
 }
+
+//Todo add test case to check answer is cached
+func TestCachedResponse(t *testing.T) {
+	t.Fail()
+}
