@@ -18,8 +18,8 @@ type HTTPRequest struct {
 	isCached       bool
 }
 
-func NewHTTPRequest(httpClient *http.Client) *HTTPRequest {
-	return &HTTPRequest{client: httpClient,
+func NewHTTPRequest() *HTTPRequest {
+	return &HTTPRequest{client: &http.Client{},
 		isCached: false}
 }
 
