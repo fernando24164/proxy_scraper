@@ -1,4 +1,7 @@
 .PHONY: test
 test:
-	dep ensure
 	go test -v ./...
+
+.PHONY: deps
+deps:
+	go get ./...
