@@ -8,7 +8,7 @@ import (
 )
 
 type Command interface {
-	Execute() string
+	Execute() *html.Node
 }
 
 type HTTPRequest struct {
@@ -25,12 +25,8 @@ func NewHTTPRequest() *HTTPRequest {
 
 // TODO Add curry function to set more headers
 func (hr *HTTPRequest) SetRequest(url string, arguments ...string) {
-	if len(arguments) < 1 {
-		hr.request, _ = http.NewRequest("GET", url, nil)
-		hr.request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko Chrome/60.0.3112.113 Safari/537.36")
-	} else {
-		hr.request.Header.Set("User-Agent", arguments[0])
-	}
+	hr.request, _ = http.NewRequest("GET", url, nil)
+	hr.request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Win64; x64 AppleWebKit/537.36 (KHTML, like Gecko Chrome/60.0.3112.113 Safari/537.36")
 }
 
 func (hr *HTTPRequest) Execute(url string) *html.Node {
