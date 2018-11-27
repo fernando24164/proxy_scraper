@@ -1,11 +1,25 @@
 package httpCommand
 
 import (
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
+
+	"golang.org/x/net/html"
 )
+
+//Added to make a mock Command
+type CommandTest interface {
+	Execute() *html.Node
+}
+
+type HTTPCommandMock struct {
+	isCached bool
+}
+
+func (hcm *HTTPCommandMock) Execute() *html.Node {
+	hcm.isCached = true
+	return &html.Node{}
+}
 
 func TestHTTPRequest_SetRequest(t *testing.T) {
 	type fields struct {
@@ -39,17 +53,10 @@ func TestHTTPRequest_SetRequest(t *testing.T) {
 	}
 }
 
-//Todo add test case to check answer is cached
 func TestCachedResponse(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		fmt.Fprint(w, "It works")
+	mockHTTP := new(HTTPCommandMock)
+	_ = mockHTTP.Execute()
+	if mockHTTP.isCached != true {
+		t.Fail()
 	}
-	req := httptest.NewRequest("GET", "http://example.com", nil)
-	w := httptest.NewRecorder()
-	handler(w, req)
-
-	//Todo Modify SetREquest to add a new parameter
-
-	t.Fail()
 }
