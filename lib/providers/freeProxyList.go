@@ -1,15 +1,19 @@
 package providers
 
 import (
+	"strings"
+
 	"golang.org/x/net/html"
 
 	httpCommand "proxy_scraper/lib/httpCommand"
 )
 
 type proxyProviderFreeProxyList struct {
-	url          string
-	httpCommand  *httpCommand.HTTPRequest
-	dataResponse *html.Node
+	url            string
+	httpCommand    *httpCommand.HTTPRequest
+	dataResponse   *html.Node
+	headers        []string
+	indexedHeaders map[string]int
 }
 
 func New() *proxyProviderFreeProxyList {
@@ -25,13 +29,59 @@ func (p *proxyProviderFreeProxyList) SetDataResponse() {
 	p.dataResponse = p.httpCommand.Execute(p.url)
 }
 
-// TODO Add test to this function
-func (p *proxyProviderFreeProxyList) GetIP() string {
-	var answer string
-	for c := p.dataResponse.FirstChild; c != nil; c = c.NextSibling {
-		if c.Data == "td" {
-			answer = c.Data
+func (p *proxyProviderFreeProxyList) SetTableHeaders() {
+	var answer []string
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Data == "th" {
+			thData := n.FirstChild.Data
+			answer = append(answer, thData)
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
 		}
 	}
+	f(p.dataResponse)
+	p.headers = answer
+}
+
+func (p *proxyProviderFreeProxyList) GetHeaderIndex(headerName string) int {
+	formatedHeader := strings.ToLower(headerName)
+	for i := 0; i < len(p.headers); i++ {
+		if formatedHeader == strings.ToLower(p.headers[i]) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (p *proxyProviderFreeProxyList) SetMapHeaders(arguments ...string) {
+	for _, arg := range arguments {
+		indexCalculated := p.GetHeaderIndex(arg)
+		if indexCalculated > 0 {
+			p.indexedHeaders[arg] = indexCalculated
+		}
+	}
+}
+
+func (p *proxyProviderFreeProxyList) GetIP() string {
+	var answer string
+	p.SetTableHeaders()
+	p.SetMapHeaders()
+	var f func(*html.Node)
+	index := 0
+	f = func(n *html.Node) {
+		if n.Data == "td" {
+			index++
+			tdData := n.FirstChild.Data
+			if index == p.indexedHeaders["IP"] {
+				answer = tdData
+			}
+		}
+		for c := p.dataResponse.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(p.dataResponse)
 	return answer
 }
