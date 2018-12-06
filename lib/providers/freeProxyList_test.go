@@ -21,7 +21,7 @@ func TestGetHeaders(t *testing.T) {
 	proxyProvider := New()
 	proxyProvider.dataResponse, _ = html.Parse(bufferingData)
 	proxyProvider.SetTableHeaders()
-	if proxyProvider.headers[0] != "IP" {
+	if proxyProvider.headers[0] != "ip" {
 		t.Fail()
 	}
 }
@@ -44,8 +44,8 @@ func TestSetMapHeaders(t *testing.T) {
 	proxyProvider := New()
 	proxyProvider.dataResponse, _ = html.Parse(bufferingData)
 	proxyProvider.SetTableHeaders()
-	proxyProvider.SetMapHeaders()
-	if proxyProvider.indexedHeaders["IP"] != 0 {
+	proxyProvider.SetMapHeaders("ip", "port", "protocol")
+	if proxyProvider.indexedHeaders["ip"] != 0 {
 		t.Fail()
 	}
 }

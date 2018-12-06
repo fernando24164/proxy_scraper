@@ -18,7 +18,8 @@ type proxyProviderFreeProxyList struct {
 
 func New() *proxyProviderFreeProxyList {
 	return &proxyProviderFreeProxyList{url: "https://free-proxy-list.net/",
-		httpCommand: httpCommand.NewHTTPRequest()}
+		httpCommand:    httpCommand.NewHTTPRequest(),
+		indexedHeaders: make(map[string]int)}
 }
 
 func (p proxyProviderFreeProxyList) GetSource() string {
@@ -34,7 +35,7 @@ func (p *proxyProviderFreeProxyList) SetTableHeaders() {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Data == "th" {
-			thData := n.FirstChild.Data
+			thData := strings.ToLower(n.FirstChild.Data)
 			answer = append(answer, thData)
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
@@ -58,7 +59,7 @@ func (p *proxyProviderFreeProxyList) GetHeaderIndex(headerName string) int {
 func (p *proxyProviderFreeProxyList) SetMapHeaders(arguments ...string) {
 	for _, arg := range arguments {
 		indexCalculated := p.GetHeaderIndex(arg)
-		if indexCalculated > 0 {
+		if indexCalculated >= 0 {
 			p.indexedHeaders[arg] = indexCalculated
 		}
 	}
@@ -67,14 +68,15 @@ func (p *proxyProviderFreeProxyList) SetMapHeaders(arguments ...string) {
 func (p *proxyProviderFreeProxyList) GetIP() string {
 	var answer string
 	p.SetTableHeaders()
-	p.SetMapHeaders()
+	p.SetMapHeaders("ip", "port", "protocol")
+	lengthHeaders := len(p.headers)
 	var f func(*html.Node)
 	index := 0
 	f = func(n *html.Node) {
 		if n.Data == "td" {
 			index++
 			tdData := n.FirstChild.Data
-			if index == p.indexedHeaders["IP"] {
+			if index%lengthHeaders == p.indexedHeaders["ip"] {
 				answer = tdData
 			}
 		}
