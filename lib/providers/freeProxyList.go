@@ -18,7 +18,7 @@ type proxyProviderFreeProxyList struct {
 
 func New() *proxyProviderFreeProxyList {
 	return &proxyProviderFreeProxyList{
-		url: "https://free-proxy-list.net/",
+		url:            "https://free-proxy-list.net/",
 		httpCommand:    httpCommand.NewHTTPRequest(),
 		indexedHeaders: make(map[string]int)}
 }
@@ -38,8 +38,10 @@ func (p *proxyProviderFreeProxyList) SetTableHeaders() {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Data == "th" {
-			thData := strings.ToLower(n.FirstChild.Data)
-			answer = append(answer, thData)
+			if n.FirstChild != nil {
+				thData := strings.ToLower(n.FirstChild.Data)
+				answer = append(answer, thData)
+			}
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
