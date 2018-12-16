@@ -142,27 +142,32 @@ func (p *proxyProviderFreeProxyList) GetProtocol() string {
 func (p *proxyProviderFreeProxyList) GetProxiesList() *proxy.ProxiesList {
 	var f func(*html.Node)
 	proxiesList := proxy.NewList()
-	proxyAux := proxy.New()
+	var proxyAux *proxy.Proxy
 	lengthHeaders := len(p.headers)
 	index := 0
 	f = func(n *html.Node) {
+		if n.Data == "tr" {
+			proxyAux = proxy.New()
+		}
 		if n.Data == "td" {
-			tdData := n.FirstChild.Data
-			if index%lengthHeaders == p.indexedHeaders["ip address"] {
-				proxyAux.SetIP(tdData)
-			}
-			if index%lengthHeaders == p.indexedHeaders["port"] {
-				proxyAux.SetPort(tdData)
-			}
-			if index%lengthHeaders == p.indexedHeaders["https"] {
-				if strings.Compare(tdData, "yes") == 0 {
-					proxyAux.SetProtocol("https")
-				} else {
-					proxyAux.SetProtocol("http")
+			if n.FirstChild != nil {
+				tdData := n.FirstChild.Data
+				if index%lengthHeaders == p.indexedHeaders["ip address"] {
+					proxyAux.SetIP(tdData)
 				}
-			}
-			if (index+1)%lengthHeaders == 0{
-				proxiesList.AddProxy(proxyAux)
+				if index%lengthHeaders == p.indexedHeaders["port"] {
+					proxyAux.SetPort(tdData)
+				}
+				if index%lengthHeaders == p.indexedHeaders["https"] {
+					if strings.Compare(tdData, "yes") == 0 {
+						proxyAux.SetProtocol("https")
+					} else {
+						proxyAux.SetProtocol("http")
+					}
+				}
+				if (index+1)%lengthHeaders == 0 {
+					proxiesList.AddProxy(proxyAux)
+				}
 			}
 			index++
 		}

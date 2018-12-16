@@ -25,5 +25,8 @@ func (pl *ProxiesList) ToJSON(fileName string) {
 	defer file.Close()
 
 	proxiesJSON, _ := json.Marshal(pl)
-	ioutil.WriteFile(fileName, proxiesJSON, 0755)
+	err := ioutil.WriteFile(fileName, proxiesJSON, 0755)
+	if err != nil {
+		log.Fatal("It was not possible to create JSON file")
+	}
 }
