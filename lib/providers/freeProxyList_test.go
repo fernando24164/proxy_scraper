@@ -2,7 +2,6 @@ package providers
 
 import (
 	"bufio"
-	"io"
 	"log"
 	"os"
 	"testing"
@@ -10,13 +9,15 @@ import (
 	"golang.org/x/net/html"
 )
 
-func getFixtureFile() io.Reader {
+func loadFixtureFile(proxy *proxyProviderFreeProxyList) {
 	file, err := os.Open("./fixtures/tableProxies.html")
 	if err != nil {
 		log.Fatal("It was not possible to read fixture file")
 	}
 
-	return bufio.NewReader(file)
+	defer file.Close()
+
+	proxy.dataResponse,_ = html.Parse(bufio.NewReader(file))
 }
 
 func TestCreation(t *testing.T) {
@@ -29,7 +30,7 @@ func TestCreation(t *testing.T) {
 
 func TestGetHeaders(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	if proxyProvider.headers[0] != "ip address" {
 		t.Fail()
@@ -38,7 +39,7 @@ func TestGetHeaders(t *testing.T) {
 
 func TestGetHeaderIndex(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	indexCalculated := proxyProvider.GetHeaderIndex("Ip Address")
 	if indexCalculated != 0 {
@@ -48,7 +49,7 @@ func TestGetHeaderIndex(t *testing.T) {
 
 func TestSetMapHeaders(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	proxyProvider.SetMapHeaders("ip address", "port", "protocol")
 	if proxyProvider.indexedHeaders["ip address"] != 0 {
@@ -67,7 +68,7 @@ func TestCreationDataResponse(t *testing.T) {
 
 func TestGetIP(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	proxyProvider.SetMapHeaders("ip address", "port", "https")
 	ip := proxyProvider.GetIP()
@@ -78,7 +79,7 @@ func TestGetIP(t *testing.T) {
 
 func TestGetPort(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	proxyProvider.SetMapHeaders("ip address", "port", "https")
 	port := proxyProvider.GetPort()
@@ -89,7 +90,7 @@ func TestGetPort(t *testing.T) {
 
 func TestGetProtocol(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	proxyProvider.SetMapHeaders("ip address", "port", "https")
 	protocol := proxyProvider.GetProtocol()
@@ -100,7 +101,7 @@ func TestGetProtocol(t *testing.T) {
 
 func TestGetProxyList(t *testing.T) {
 	proxyProvider := New()
-	proxyProvider.dataResponse, _ = html.Parse(getFixtureFile())
+	loadFixtureFile(proxyProvider)
 	proxyProvider.SetTableHeaders()
 	proxyProvider.SetMapHeaders("ip address", "port", "https")
 	proxyList := proxyProvider.GetProxiesList()
