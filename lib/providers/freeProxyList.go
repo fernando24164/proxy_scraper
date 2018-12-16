@@ -6,6 +6,8 @@ import (
 	"golang.org/x/net/html"
 
 	"proxy_scraper/lib/httpCommand"
+
+	"proxy_scraper/lib/proxy"
 )
 
 type proxyProviderFreeProxyList struct {
@@ -52,9 +54,9 @@ func (p *proxyProviderFreeProxyList) SetTableHeaders() {
 }
 
 func (p *proxyProviderFreeProxyList) GetHeaderIndex(headerName string) int {
-	formatedHeader := strings.ToLower(headerName)
+	formattedHeader := strings.ToLower(headerName)
 	for i := 0; i < len(p.headers); i++ {
-		if formatedHeader == strings.ToLower(p.headers[i]) {
+		if formattedHeader == strings.ToLower(p.headers[i]) {
 			return i
 		}
 	}
@@ -135,4 +137,39 @@ func (p *proxyProviderFreeProxyList) GetProtocol() string {
 	}
 	f(p.dataResponse)
 	return answer
+}
+
+func (p *proxyProviderFreeProxyList) GetProxiesList() *proxy.ProxiesList {
+	var f func(*html.Node)
+	proxiesList := proxy.NewList()
+	proxyAux := proxy.New()
+	lengthHeaders := len(p.headers)
+	index := 0
+	f = func(n *html.Node) {
+		if n.Data == "td" {
+			tdData := n.FirstChild.Data
+			if index%lengthHeaders == p.indexedHeaders["ip address"] {
+				proxyAux.SetIP(tdData)
+			}
+			if index%lengthHeaders == p.indexedHeaders["port"] {
+				proxyAux.SetPort(tdData)
+			}
+			if index%lengthHeaders == p.indexedHeaders["https"] {
+				if strings.Compare(tdData, "yes") == 0 {
+					proxyAux.SetProtocol("https")
+				} else {
+					proxyAux.SetProtocol("http")
+				}
+			}
+			if (index+1)%lengthHeaders == 0{
+				proxiesList.AddProxy(proxyAux)
+			}
+			index++
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(p.dataResponse)
+	return proxiesList
 }
