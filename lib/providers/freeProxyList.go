@@ -143,7 +143,7 @@ func (p *proxyProviderFreeProxyList) GetProxiesList() *proxy.ProxiesList {
 	var f func(*html.Node)
 	proxiesList := proxy.NewList()
 	var proxyAux *proxy.Proxy
-	lengthHeaders := len(p.headers)
+	lengthHeaders := len(p.headers)-1
 	index := 0
 	f = func(n *html.Node) {
 		if n.Data == "tr" {
@@ -165,11 +165,11 @@ func (p *proxyProviderFreeProxyList) GetProxiesList() *proxy.ProxiesList {
 						proxyAux.SetProtocol("http")
 					}
 				}
-				if (index+1)%lengthHeaders == 0 {
+				if index%lengthHeaders == 0 {
 					proxiesList.AddProxy(proxyAux)
 				}
+				index++
 			}
-			index++
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
