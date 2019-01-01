@@ -39,6 +39,26 @@ func TestSetProtocol(t *testing.T) {
 	}
 }
 
+func TestIsValid(t *testing.T) {
+	proxy := New()
+	proxy.SetIP("1.21545.16542.1")
+	proxy.SetPort("1014")
+	proxy.SetProtocol("http")
+	if proxy.IsValid() {
+		t.Fail()
+	}
+}
+
+func TestIsValid2(t *testing.T) {
+	proxy := New()
+	proxy.SetIP("https")
+	proxy.SetPort("1014")
+	proxy.SetProtocol("http")
+	if proxy.IsValid() {
+		t.Fail()
+	}
+}
+
 func TestProxiesList(t *testing.T) {
 	pl := NewList()
 	if pl == nil {
