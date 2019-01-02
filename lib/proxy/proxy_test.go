@@ -59,6 +59,16 @@ func TestIsValid2(t *testing.T) {
 	}
 }
 
+func TestCheckConnectivity(t *testing.T) {
+	proxy := New()
+	proxy.SetIP("192.168.33.10")
+	proxy.SetPort("1924")
+	proxy.SetProtocol("http")
+	if proxy.CheckConnectivity() {
+		t.Fail()
+	}
+}
+
 func TestProxiesList(t *testing.T) {
 	pl := NewList()
 	if pl == nil {
